@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISHWASH</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Who is the Dishwasher?</h1>
+            <p>Created by Jun Kim — Dedicated to Brad Yoon</p>
+        </header>
+
+        <main>
+            <!-- Name Input Section -->
+            <section class="input-section">
+                <h2>Add Possible Dishwashers</h2>
+                <div class="input-group">
+                    <input type="text" id="nameInput" placeholder="Enter a name..." maxlength="20">
+                    <button id="addBtn" class="btn btn-primary">Add</button>
+                </div>
+                <div class="name-list" id="nameList">
+                    <p class="empty-message">No Dishwashers added yet. Add some nominees to get started!</p>
+                </div>
+            </section>
+
+            <!-- Selection Settings -->
+            <section class="settings-section">
+                <h2>Dishwash Settings</h2>
+                <div class="slider-container">
+                    <label for="selectCount">How many people should dishwash?</label>
+                    <div class="slider-wrapper">
+                        <input type="range" id="selectCount" min="1" max="10" value="1">
+                        <span id="selectCountValue">1</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Selection Button -->
+            <section class="selection-section">
+                <button id="selectBtn" class="btn btn-select" disabled>
+                    Start Game!
+                </button>
+            </section>
+
+            <!-- Dishwash Game Section -->
+            <section class="game-section" id="gameSection" style="display: none;">
+                <h2>Dishwash Game</h2>
+                <div class="game-info">
+                    <div class="current-player" id="currentPlayer">
+                        <p>Current Dishwasher: <span id="currentPlayerName">-</span></p>
+                    </div>
+                    <div class="game-status" id="gameStatus">
+                        <p>Choose a tile to dishwash!</p>
+                    </div>
+                </div>
+                <div class="alligator-container">
+                    <div class="alligator-mouth">
+                        <div class="teeth-grid" id="teethGrid">
+                            <!-- 20 teeth will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Game Over!</h2>
+                <div class="results-container" id="resultsContainer">
+                </div>
+                <button id="resetBtn" class="btn btn-secondary">Play Again</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>May the luckiest dishwashers survive!</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
