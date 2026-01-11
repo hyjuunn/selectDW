@@ -1,1 +1,644 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dishwasher Brad</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-transform: uppercase;
+            overflow: hidden; /* Prevent scrollbars during party shake */
+            transition: background-color 0.2s;
+        }
+
+        .container {
+            width: 800px;
+            max-width: 95%;
+            border: 4px solid white;
+            padding: 20px;
+            text-align: center;
+            background: #111;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* --- SCOREBOARD --- */
+        #scoreboard {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 240px;
+            border: 2px solid #fff;
+            background: #111;
+            color: #fff;
+            padding: 12px;
+            z-index: 3;
+            text-align: left;
+        }
+        #scoreboard h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+        .score-row:last-child { border-bottom: none; }
+        .score-row.active { color: #FFFF00; font-weight: bold; }
+
+        /* --- INPUTS & BUTTONS --- */
+        input {
+            background: #000;
+            border: 2px solid #555;
+            color: white;
+            padding: 10px;
+            font-family: inherit;
+            margin: 5px;
+            width: 200px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        input:focus { outline: none; border-color: white; }
+
+        button {
+            background: white;
+            color: black;
+            border: 2px solid white;
+            padding: 12px 24px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 1.1em;
+            transition: 0.2s;
+        }
+        button:hover { background: #ccc; }
+        button:disabled { background: #333; border-color: #333; color: #777; cursor: not-allowed; }
+
+        /* PARTY BUTTON STYLE */
+        #party-btn {
+            background: black;
+            color: white;
+            border: 2px solid white;
+        }
+        #party-btn:hover {
+            background: #222;
+            color: #ff00ff; /* Hint at the party */
+            border-color: #ff00ff;
+        }
+
+        /* --- GAME UI --- */
+        canvas {
+            border: 2px solid #fff;
+            background: #000;
+            margin: 20px auto;
+            display: block;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .big-text { font-size: 4em; font-weight: bold; margin: 10px 0; }
+        
+        .hidden { display: none !important; }
+
+        /* --- ANIMATIONS --- */
+        .blink { animation: blinker 0.2s linear infinite; color: red; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* --- PARTY MODE ANIMATIONS --- */
+        @keyframes rainbow-bg {
+            0% { background-color: #ff0000; filter: invert(0%); }
+            20% { background-color: #ffff00; filter: invert(20%); }
+            40% { background-color: #00ff00; filter: invert(40%); }
+            60% { background-color: #00ffff; filter: invert(60%); }
+            80% { background-color: #0000ff; filter: invert(80%); }
+            100% { background-color: #ff00ff; filter: invert(100%); }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .party-active body {
+            animation: rainbow-bg 0.5s infinite;
+        }
+        
+        .party-active .container {
+            border-color: black;
+            background: white;
+            color: black;
+            animation: shake 0.5s infinite;
+            box-shadow: 0 0 50px white;
+        }
+        
+        /* Invert canvas during party for trippy effect */
+        .party-active canvas {
+            filter: invert(100%);
+        }
+
+        /* --- OVERLAY --- */
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+            color: white; /* Reset overlay text color */
+        }
+        
+        .reveal-text {
+            color: #FFFF00;
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left-side Scoreboard -->
+    <div id="scoreboard" class="hidden">
+        <h3>SCOREBOARD</h3>
+        <div id="scoreboard-list"></div>
+    </div>
+
+    <div id="setup-screen" class="container">
+        <h1>DISHWASHER V2</h1>
+        <p>Rules:</p>
+        <ul style="text-align: left; display: inline-block;">
+            <li>10 Rounds per match.</li>
+            <li>If you go below $0.01, you lose immediately.</li>
+        </ul>
+        <div id="player-inputs">
+            <input type="text" class="name-input" placeholder="PLAYER 1">
+            <input type="text" class="name-input" placeholder="PLAYER 2">
+            <input type="text" class="name-input" placeholder="PLAYER 3">
+        </div>
+        <br>
+        <button onclick="addInput()">+ Add Player</button>
+        <button onclick="startGame()">START GAME</button>
+    </div>
+
+    <div id="game-screen" class="container hidden">
+        <div class="info-bar">
+            <span id="match-display">MATCH 1</span>
+            <span id="round-display">ROUND 1/10</span>
+            <span id="player-display" style="color: yellow;">PLAYER: ???</span>
+            <span id="money-display">$$$: 100.00</span>
+        </div>
+
+        <div id="multiplier-display" class="big-text">1.00x</div>
+        <div id="reveal-display" class="reveal-text" style="visibility: hidden;">(Crash was 2.00x)</div>
+
+        <canvas id="gameCanvas" width="700" height="300"></canvas>
+
+        <div id="controls">
+            <input type="number" id="bet-input" placeholder="BET AMOUNT" value="10" min="0.01" step="0.01">
+            <button id="action-btn" onclick="placeBet()">PLACE BET</button>
+            <button id="party-btn" onclick="activateParty()">PARTY (-$100)</button>
+        </div>
+        <div id="status-msg" style="min-height: 1.5em; color: #888;">Waiting for bet...</div>
+
+        <div id="overlay" class="hidden">
+            <h1 id="overlay-title">MATCH OVER</h1>
+            <p id="overlay-msg">...</p>
+            <button onclick="nextMatch()">CONTINUE</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container hidden">
+        <h1 style="color: red;">GAME OVER</h1>
+        <p>THE DISHWASHER IS:</p>
+        <h2 id="loser-name" style="font-size: 3em; border: 2px solid red; padding: 20px;">???</h2>
+        <p id="loss-reason" style="color: #aaa;">(Ran out of money)</p>
+        <br>
+        <p>SAFE PLAYERS:</p>
+        <div id="safe-list" style="text-align: left; margin: 0 auto; width: 200px;"></div>
+        <br>
+        <button onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+
+    <script>
+        // --- VARIABLES ---
+        let players = [];    
+        let safePlayers = []; 
+        
+        let matchNum = 1;
+        let roundNum = 1;
+        let playerIdx = 0;
+        
+        // Graph Variables
+        let canvas, ctx;
+        let animationFrame;
+        let startTime;
+        let isRunning = false;
+        let currentMultiplier = 1.00;
+        let crashPoint = 0;
+        let currentBet = 0;
+
+        // --- SETUP ---
+        function addInput() {
+            const container = document.getElementById('player-inputs');
+            const input = document.createElement('input');
+            input.type = "text";
+            input.className = "name-input";
+            input.placeholder = "PLAYER " + (container.children.length + 1);
+            container.appendChild(input);
+        }
+
+        function startGame() {
+            let inputs = document.querySelectorAll('.name-input');
+            players = [];
+            inputs.forEach(inp => {
+                if (inp.value.trim()) {
+                    players.push({ name: inp.value.toUpperCase().trim(), money: 100.00 });
+                }
+            });
+
+            if (players.length < 2) {
+                alert("You need at least 2 players!");
+                return;
+            }
+
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('scoreboard').classList.remove('hidden');
+
+            startMatch();
+        }
+
+        // --- MONEY HELPERS ---
+        function toCents(n) {
+            return Math.round((n + Number.EPSILON) * 100) / 100;
+        }
+
+        // --- MATCH LOGIC ---
+        function startMatch() {
+            roundNum = 1;
+            playerIdx = 0;
+            
+            players.forEach(p => p.money = 100.00);
+
+            document.getElementById('overlay').classList.add('hidden');
+            
+            updateUI();
+            resetGraph();
+        }
+
+        function updateUI() {
+            if (players.length === 0) return;
+            let p = players[playerIdx];
+
+            document.getElementById('match-display').innerText = `MATCH ${matchNum}`;
+            document.getElementById('round-display').innerText = `ROUND ${roundNum}/10`;
+            document.getElementById('player-display').innerText = `PLAYER: ${p.name}`;
+            document.getElementById('money-display').innerText = `$${p.money.toFixed(2)}`;
+            
+            // Reset Visuals
+            document.getElementById('multiplier-display').innerText = "1.00x";
+            document.getElementById('multiplier-display').className = "big-text";
+            document.getElementById('multiplier-display').style.color = "white";
+            
+            document.getElementById('reveal-display').style.visibility = "hidden";
+            
+            document.getElementById('action-btn').innerText = "PLACE BET";
+            document.getElementById('action-btn').disabled = false;
+            document.getElementById('action-btn').onclick = placeBet;
+            document.getElementById('bet-input').disabled = false;
+
+            // Party Button Logic
+            const partyBtn = document.getElementById('party-btn');
+            partyBtn.disabled = p.money < 100;
+            
+            document.getElementById('status-msg').innerText = `${p.name}, place your bet.`;
+
+            // Update scoreboard
+            renderScoreboard();
+        }
+
+        function resetGraph() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let x=0; x<canvas.width; x+=50) { ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); }
+            for(let y=0; y<canvas.height; y+=50) { ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); }
+            ctx.stroke();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.stroke();
+        }
+
+        // --- NEW FEATURE: PARTY MODE ---
+        function activateParty() {
+            let p = players[playerIdx];
+            if (p.money < 100) return; // double check
+
+            // Pay for party
+            p.money = toCents(p.money - 100);
+            updateUI();
+            
+            // Visuals
+            document.documentElement.classList.add('party-active');
+            
+            // Play sound effect? (Optional, kept silent for now)
+            document.getElementById('status-msg').innerText = "PARTY TIME!!!";
+
+            // Apply party effect: either double others or halve others
+            const outcomeDouble = Math.random() < 0.5; // 50/50
+            let bankruptOther = null;
+            players.forEach((other, i) => {
+                if (i === playerIdx) return; // exclude initiator
+                if (outcomeDouble) {
+                    other.money = toCents(other.money * 2);
+                } else {
+                    const raw = other.money / 2;
+                    if (raw < 0.01 && !bankruptOther) bankruptOther = other;
+                    other.money = toCents(raw);
+                }
+            });
+            renderScoreboard();
+            if (bankruptOther) {
+                document.getElementById('status-msg').innerText = `${bankruptOther.name} dropped below $0.01!`;
+                document.documentElement.classList.remove('party-active');
+                showFinalResults(bankruptOther, "RAN OUT OF MONEY");
+                return;
+            }
+            document.getElementById('status-msg').innerText = outcomeDouble 
+                ? "Party effect: doubled everyone else!"
+                : "Party effect: halved everyone else!";
+
+            // Remove effect after 3 seconds
+            setTimeout(() => {
+                document.documentElement.classList.remove('party-active');
+                document.getElementById('status-msg').innerText = "Party over. Back to betting.";
+                
+                // Bankruptcy check (in case they spent their last $100 on a party)
+                if (p.money < 0.01) {
+                    showFinalResults(p, "SPENT IT ALL ON PARTYING");
+                }
+            }, 3000);
+        }
+
+        // --- GAMEPLAY ---
+        function placeBet() {
+            let betVal = parseFloat(document.getElementById('bet-input').value);
+            let p = players[playerIdx];
+
+            if (isNaN(betVal) || betVal < 0.01) {
+                alert("Minimum bet is $0.01");
+                return;
+            }
+            if (betVal > p.money) {
+                alert("Not enough money! You have $" + p.money.toFixed(2));
+                return;
+            }
+
+            // Lock in bet
+            currentBet = betVal;
+            p.money = toCents(p.money - currentBet);
+            updateUI(); 
+
+            // Controls
+            document.getElementById('bet-input').disabled = true;
+            document.getElementById('action-btn').innerText = "CASH OUT!";
+            document.getElementById('action-btn').onclick = cashOut;
+            document.getElementById('party-btn').disabled = true; // No partying mid-round
+            document.getElementById('status-msg').innerText = "Graph is rising...";
+
+            // --- PROBABILITY LOGIC (High Variance) ---
+            let r = Math.random();
+            let min, max;
+
+            if (r < 0.15) { // 15% Moon Shot
+                min = 20; max = 100;
+            } else if (r < 0.50) { // 35% Good Run
+                min = 3; max = 20;
+            } else { // 50% Standard
+                min = 1; max = 3;
+            }
+            
+            crashPoint = Math.random() * (max - min) + min;
+            crashPoint = Math.floor(crashPoint * 100) / 100;
+
+            // Start Loop
+            isRunning = true;
+            startTime = Date.now();
+            currentMultiplier = 1.00;
+            loop();
+        }
+
+        function loop() {
+            if (!isRunning) return;
+
+            let now = Date.now();
+            let elapsed = (now - startTime) / 1000; 
+
+            // Growth Speed
+            currentMultiplier = Math.pow(Math.E, 0.2 * elapsed); 
+
+            if (currentMultiplier > 100) currentMultiplier = 100.00;
+
+            drawGraph(elapsed, currentMultiplier);
+
+            document.getElementById('multiplier-display').innerText = currentMultiplier.toFixed(2) + "x";
+
+            if (currentMultiplier >= crashPoint) {
+                doCrash();
+            } else {
+                animationFrame = requestAnimationFrame(loop);
+            }
+        }
+
+        function drawGraph(time, mult) {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "#222";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let x=0; x<canvas.width; x+=50) { ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); }
+            for(let y=0; y<canvas.height; y+=50) { ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); }
+            ctx.stroke();
+
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height);
+
+            let displayMult = mult > 10 ? mult : 10; 
+            
+            let scaleX = canvas.width / (time + 1); 
+            let scaleY = canvas.height / (displayMult + 1);
+
+            for(let t=0; t<=time; t+=0.05) {
+                let m = Math.pow(Math.E, 0.2 * t);
+                let x = t * scaleX;
+                let y = canvas.height - ((m - 1) * (canvas.height / displayMult)); 
+                if (y < 0) y = 0;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        function cashOut() {
+            if(!isRunning) return;
+            isRunning = false;
+            cancelAnimationFrame(animationFrame);
+
+            let profit = toCents(currentBet * currentMultiplier);
+            players[playerIdx].money = toCents(players[playerIdx].money + profit);
+            renderScoreboard();
+            
+            document.getElementById('status-msg').innerText = `WON $${profit.toFixed(2)}!`;
+            document.getElementById('multiplier-display').style.color = "#0f0"; 
+            
+            showReveal(`Cashed @ ${currentMultiplier.toFixed(2)}x`, `(Graph set to ${crashPoint.toFixed(2)}x)`);
+            
+            endTurn();
+        }
+
+        function doCrash() {
+            isRunning = false;
+            cancelAnimationFrame(animationFrame);
+
+            document.getElementById('multiplier-display').innerText = "CRASH @ " + crashPoint.toFixed(2) + "x";
+            document.getElementById('multiplier-display').classList.add('blink');
+            document.getElementById('status-msg').innerText = `LOST $${currentBet.toFixed(2)}`;
+            
+            endTurn();
+        }
+
+        function showReveal(mainText, subText) {
+            let el = document.getElementById('reveal-display');
+            el.innerText = subText;
+            el.style.visibility = "visible";
+        }
+
+        function endTurn() {
+            document.getElementById('action-btn').disabled = true;
+            document.getElementById('party-btn').disabled = true;
+
+            setTimeout(() => {
+                if (players[playerIdx].money < 0.01) {
+                    showFinalResults(players[playerIdx], "RAN OUT OF MONEY");
+                    return; 
+                }
+
+                playerIdx++;
+                
+                if (playerIdx >= players.length) {
+                    playerIdx = 0;
+                    roundNum++;
+                }
+
+                if (roundNum > 10) {
+                    endMatch();
+                } else {
+                    updateUI();
+                    resetGraph();
+                }
+            }, 3000); 
+        }
+
+        // --- ELIMINATION LOGIC ---
+        function endMatch() {
+            players.sort((a,b) => b.money - a.money);
+
+            let winner = players[0]; 
+            safePlayers.push(winner);
+            players.shift(); 
+
+            renderScoreboard();
+
+            if (players.length === 1) {
+                showFinalResults(players[0], "LAST PLAYER LEFT");
+            } else {
+                let overlay = document.getElementById('overlay');
+                document.getElementById('overlay-title').innerText = `${winner.name} IS SAFE!`;
+                document.getElementById('overlay-msg').innerText = `Escaped with $${winner.money.toFixed(2)}. Remaining players: ${players.length}`;
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        function nextMatch() {
+            matchNum++;
+            startMatch();
+        }
+
+        function showFinalResults(loser, reason) {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('scoreboard').classList.add('hidden');
+
+            document.getElementById('loser-name').innerText = loser.name;
+            document.getElementById('loss-reason').innerText = `(${reason})`;
+
+            let safeHTML = "";
+            safePlayers.forEach(p => {
+                safeHTML += `<div>- ${p.name} ($${p.money.toFixed(2)})</div>`;
+            });
+            players.forEach(p => {
+                if (p !== loser) {
+                    safeHTML += `<div>- ${p.name} (Saved by bankruptcy)</div>`;
+                }
+            });
+
+            document.getElementById('safe-list').innerHTML = safeHTML;
+        }
+
+        // --- SCOREBOARD RENDERING ---
+        function renderScoreboard() {
+            const listEl = document.getElementById('scoreboard-list');
+            if (!listEl) return;
+            let html = "";
+            players.forEach((p, i) => {
+                const active = i === playerIdx ? 'score-row active' : 'score-row';
+                html += `<div class="${active}"><span>${p.name}</span><span>$${p.money.toFixed(2)}</span></div>`;
+            });
+            listEl.innerHTML = html;
+        }
+
+    </script>
+</body>
+</html>
