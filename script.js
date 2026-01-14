@@ -332,7 +332,15 @@ function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
-    notification.textContent = message;
+    notification.textContent = `[ ${message} ]`;
+    
+    // Get neon colors based on type
+    const colors = {
+        error: { bg: 'rgba(255, 51, 51, 0.9)', glow: '0 0 10px #f33, 0 0 20px #f33' },
+        success: { bg: 'rgba(0, 255, 0, 0.9)', glow: '0 0 10px #0f0, 0 0 20px #0f0' },
+        info: { bg: 'rgba(0, 255, 255, 0.9)', glow: '0 0 10px #0ff, 0 0 20px #0ff' }
+    };
+    const style = colors[type] || colors.info;
     
     // Style the notification
     Object.assign(notification.style, {
@@ -340,16 +348,17 @@ function showNotification(message, type = 'info') {
         top: '20px',
         left: '50%',
         transform: 'translateX(-50%)',
-        background: type === 'error' ? '#ff6b6b' : 
-                   type === 'success' ? '#51cf66' : '#4dabf7',
-        color: 'white',
+        background: style.bg,
+        color: '#000',
         padding: '12px 24px',
-        borderRadius: '25px',
-        fontSize: '14px',
-        fontWeight: '600',
-        zIndex: '1000',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-        animation: 'slideDown 0.3s ease-out'
+        fontSize: 'clamp(0.8rem, 2.5vw, 1rem)',
+        fontFamily: "'VT323', 'Share Tech Mono', 'Courier New', monospace",
+        textTransform: 'uppercase',
+        letterSpacing: '2px',
+        zIndex: '9999',
+        boxShadow: style.glow,
+        animation: 'slideDown 0.3s ease-out',
+        border: '2px solid currentColor'
     });
     
     document.body.appendChild(notification);

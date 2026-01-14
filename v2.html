@@ -3,138 +3,299 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dishwasher Brad</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dishwasher V2</title>
     <style>
+        /* Import terminal-style font */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            /* Neon color palette */
+            --neon-cyan: #0ff;
+            --neon-magenta: #f0f;
+            --neon-green: #0f0;
+            --neon-yellow: #ff0;
+            --neon-red: #f33;
+            --neon-orange: #f90;
+            
+            /* Base colors */
+            --bg-dark: #0a0a0a;
+            --bg-panel: #111;
+            --bg-input: #0a0a0a;
+            --border-color: #333;
+            --text-primary: #0ff;
+            --text-secondary: #0f0;
+            --text-dim: #666;
+            
+            /* Glow effects */
+            --glow-cyan: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff;
+            --glow-green: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 20px #0f0;
+            --glow-magenta: 0 0 5px #f0f, 0 0 10px #f0f, 0 0 20px #f0f;
+            --glow-red: 0 0 5px #f33, 0 0 10px #f33, 0 0 20px #f33;
+            --glow-yellow: 0 0 5px #ff0, 0 0 10px #ff0, 0 0 20px #ff0;
+            
+            /* Font sizes - using clamp for responsiveness */
+            --font-xs: clamp(0.7rem, 2vw, 0.8rem);
+            --font-sm: clamp(0.8rem, 2.5vw, 0.9rem);
+            --font-base: clamp(0.9rem, 3vw, 1rem);
+            --font-lg: clamp(1rem, 3.5vw, 1.2rem);
+            --font-xl: clamp(1.3rem, 4vw, 1.5rem);
+            --font-2xl: clamp(1.8rem, 5vw, 2.5rem);
+            --font-3xl: clamp(2.5rem, 8vw, 4rem);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
-            background-color: #000000;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            min-height: 100dvh;
             margin: 0;
             text-transform: uppercase;
-            overflow: hidden; /* Prevent scrollbars during party shake */
+            letter-spacing: 1px;
+            overflow-x: hidden;
             transition: background-color 0.2s;
         }
 
+        /* Scanline effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            z-index: 1000;
+        }
+
         .container {
-            width: 800px;
-            max-width: 95%;
-            border: 4px solid white;
-            padding: 20px;
+            width: min(800px, 95vw);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 255, 255, 0.05);
+            padding: clamp(15px, 4vw, 25px);
             text-align: center;
-            background: #111;
+            background: var(--bg-panel);
             position: relative;
             z-index: 2;
+        }
+
+        .container::before {
+            content: "[ TERMINAL V2 ]";
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: var(--bg-panel);
+            padding: 0 8px;
+            font-size: var(--font-xs);
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        h1 {
+            font-size: var(--font-2xl);
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            margin-bottom: clamp(10px, 3vw, 20px);
+            animation: flicker 3s infinite;
         }
 
         /* --- SCOREBOARD --- */
         #scoreboard {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            width: 240px;
-            border: 2px solid #fff;
-            background: #111;
-            color: #fff;
-            padding: 12px;
+            top: clamp(10px, 3vw, 20px);
+            left: clamp(10px, 3vw, 20px);
+            width: min(240px, 40vw);
+            border: 2px solid var(--neon-green);
+            box-shadow: var(--glow-green);
+            background: var(--bg-panel);
+            color: var(--neon-green);
+            padding: clamp(8px, 2vw, 12px);
             z-index: 3;
             text-align: left;
+            font-size: var(--font-sm);
         }
+        
         #scoreboard h3 {
             margin: 0 0 8px 0;
-            font-size: 1.1em;
-            letter-spacing: 1px;
+            font-size: var(--font-base);
+            letter-spacing: 2px;
+            text-shadow: var(--glow-green);
         }
+        
         .score-row {
             display: flex;
             justify-content: space-between;
             padding: 4px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border-color);
+            font-size: var(--font-sm);
         }
+        
         .score-row:last-child { border-bottom: none; }
-        .score-row.active { color: #FFFF00; font-weight: bold; }
+        .score-row.active { 
+            color: var(--neon-yellow); 
+            text-shadow: var(--glow-yellow);
+        }
 
         /* --- INPUTS & BUTTONS --- */
         input {
-            background: #000;
-            border: 2px solid #555;
-            color: white;
-            padding: 10px;
+            background: var(--bg-input);
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: clamp(8px, 2vw, 12px);
             font-family: inherit;
             margin: 5px;
-            width: 200px;
+            width: min(200px, 60vw);
             text-align: center;
-            font-size: 1.2em;
+            font-size: var(--font-base);
+            text-transform: uppercase;
         }
-        input:focus { outline: none; border-color: white; }
+        
+        input:focus { 
+            outline: none; 
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        input::placeholder {
+            color: var(--text-dim);
+        }
 
         button {
-            background: white;
-            color: black;
-            border: 2px solid white;
-            padding: 12px 24px;
+            background: transparent;
+            color: var(--neon-cyan);
+            border: 2px solid var(--neon-cyan);
+            padding: clamp(10px, 2.5vw, 12px) clamp(15px, 4vw, 24px);
             font-family: inherit;
-            font-weight: bold;
             cursor: pointer;
-            margin: 10px;
-            font-size: 1.1em;
-            transition: 0.2s;
+            margin: clamp(5px, 1.5vw, 10px);
+            font-size: var(--font-base);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        button:hover { background: #ccc; }
-        button:disabled { background: #333; border-color: #333; color: #777; cursor: not-allowed; }
+        
+        button:hover { 
+            background: var(--neon-cyan);
+            color: var(--bg-dark);
+            box-shadow: var(--glow-cyan);
+        }
+        
+        button:disabled { 
+            background: var(--border-color); 
+            border-color: var(--border-color); 
+            color: var(--text-dim); 
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
         /* PARTY BUTTON STYLE */
         #party-btn {
-            background: black;
-            color: white;
-            border: 2px solid white;
+            background: transparent;
+            color: var(--neon-magenta);
+            border-color: var(--neon-magenta);
         }
-        #party-btn:hover {
-            background: #222;
-            color: #ff00ff; /* Hint at the party */
-            border-color: #ff00ff;
+        
+        #party-btn:hover:not(:disabled) {
+            background: var(--neon-magenta);
+            color: var(--bg-dark);
+            box-shadow: var(--glow-magenta);
         }
 
         /* --- GAME UI --- */
         canvas {
-            border: 2px solid #fff;
-            background: #000;
-            margin: 20px auto;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+            background: var(--bg-dark);
+            margin: clamp(10px, 3vw, 20px) auto;
             display: block;
             width: 100%;
             max-width: 700px;
+            height: auto;
         }
 
         .info-bar {
             display: flex;
             justify-content: space-between;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-size: 1em;
+            flex-wrap: wrap;
+            gap: clamp(5px, 2vw, 10px);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: clamp(8px, 2vw, 10px);
+            margin-bottom: clamp(10px, 3vw, 20px);
+            font-size: var(--font-sm);
         }
 
-        .big-text { font-size: 4em; font-weight: bold; margin: 10px 0; }
+        .info-bar span {
+            color: var(--neon-cyan);
+        }
+
+        #player-display {
+            color: var(--neon-yellow) !important;
+            text-shadow: var(--glow-yellow);
+        }
+
+        #money-display {
+            color: var(--neon-green) !important;
+            text-shadow: var(--glow-green);
+        }
+
+        .big-text { 
+            font-size: var(--font-3xl); 
+            margin: clamp(5px, 2vw, 10px) 0;
+            color: var(--text-primary);
+            text-shadow: var(--glow-cyan);
+        }
         
         .hidden { display: none !important; }
 
         /* --- ANIMATIONS --- */
-        .blink { animation: blinker 0.2s linear infinite; color: red; }
+        .blink { 
+            animation: blinker 0.2s linear infinite; 
+            color: var(--neon-red) !important;
+            text-shadow: var(--glow-red) !important;
+        }
+        
         @keyframes blinker { 50% { opacity: 0; } }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                opacity: 0.8;
+            }
+        }
 
         /* --- PARTY MODE ANIMATIONS --- */
         @keyframes rainbow-bg {
-            0% { background-color: #ff0000; filter: invert(0%); }
-            20% { background-color: #ffff00; filter: invert(20%); }
-            40% { background-color: #00ff00; filter: invert(40%); }
-            60% { background-color: #00ffff; filter: invert(60%); }
-            80% { background-color: #0000ff; filter: invert(80%); }
-            100% { background-color: #ff00ff; filter: invert(100%); }
+            0% { background-color: #ff0000; }
+            20% { background-color: #ffff00; }
+            40% { background-color: #00ff00; }
+            60% { background-color: #00ffff; }
+            80% { background-color: #0000ff; }
+            100% { background-color: #ff00ff; }
         }
 
         @keyframes shake {
@@ -151,40 +312,195 @@
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        .party-active body {
-            animation: rainbow-bg 0.5s infinite;
+        html.party-active {
+            animation: rainbow-bg 0.2s linear infinite;
         }
         
-        .party-active .container {
-            border-color: black;
-            background: white;
-            color: black;
-            animation: shake 0.5s infinite;
-            box-shadow: 0 0 50px white;
+        html.party-active body {
+            background: transparent;
         }
         
-        /* Invert canvas during party for trippy effect */
-        .party-active canvas {
-            filter: invert(100%);
+        html.party-active .container {
+            border-color: #fff;
+            background: rgba(0, 0, 0, 0.3);
+            animation: shake 0.1s linear infinite;
+            box-shadow: 0 0 50px #fff, 0 0 100px #f0f, 0 0 150px #0ff;
+        }
+        
+        html.party-active .container h1,
+        html.party-active .container span,
+        html.party-active .container p,
+        html.party-active .container div,
+        html.party-active .container button {
+            color: #fff !important;
+            text-shadow: 0 0 10px #fff, 0 0 20px #f0f, 0 0 30px #0ff !important;
+        }
+        
+        html.party-active canvas {
+            filter: hue-rotate(180deg) saturate(3) brightness(1.5);
+            box-shadow: 0 0 30px #f0f, 0 0 60px #0ff;
+        }
+        
+        html.party-active button {
+            border-color: #fff !important;
+            background: rgba(255, 0, 255, 0.3) !important;
+            box-shadow: 0 0 20px #f0f !important;
+        }
+        
+        html.party-active #scoreboard {
+            border-color: #fff;
+            box-shadow: 0 0 30px #0f0, 0 0 60px #ff0;
+        }
+
+        /* Crash red flash effect */
+        html.crash-active .container {
+            border-color: #f33 !important;
+            background: rgba(255, 50, 50, 0.3) !important;
+            box-shadow: 0 0 50px #f33, 0 0 100px #f00, inset 0 0 50px rgba(255, 0, 0, 0.2) !important;
+            animation: shake 0.1s linear infinite;
+        }
+        
+        html.crash-active #scoreboard {
+            border-color: #f33;
+            box-shadow: 0 0 30px #f33;
+        }
+        
+        html.crash-active canvas {
+            box-shadow: 0 0 30px #f33, 0 0 60px #f00;
         }
 
         /* --- OVERLAY --- */
         #overlay {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 99;
-            color: white; /* Reset overlay text color */
+            color: var(--neon-cyan);
+        }
+
+        #overlay h1 {
+            font-size: var(--font-2xl);
+        }
+
+        #overlay p {
+            font-size: var(--font-base);
+            color: var(--text-dim);
+            margin: clamp(10px, 3vw, 15px) 0;
         }
         
         .reveal-text {
-            color: #FFFF00;
-            font-size: 1.2em;
+            color: var(--neon-yellow);
+            text-shadow: var(--glow-yellow);
+            font-size: var(--font-lg);
             margin-top: 5px;
+        }
+
+        /* Rules list styling */
+        ul {
+            text-align: left;
+            display: inline-block;
+            color: var(--neon-green);
+            font-size: var(--font-sm);
+            margin: clamp(10px, 3vw, 15px) 0;
+        }
+
+        ul li {
+            margin: 5px 0;
+        }
+
+        p {
+            color: var(--text-dim);
+            font-size: var(--font-sm);
+        }
+
+        #status-msg {
+            min-height: 1.5em;
+            color: var(--text-dim);
+            font-size: var(--font-sm);
+        }
+
+        /* Result screen styling */
+        #result-screen h1 {
+            color: var(--neon-red) !important;
+            text-shadow: var(--glow-red) !important;
+        }
+
+        #loser-name {
+            font-size: var(--font-2xl);
+            border: 2px solid var(--neon-red);
+            box-shadow: var(--glow-red);
+            padding: clamp(10px, 3vw, 20px);
+            color: var(--neon-red);
+            margin: clamp(10px, 3vw, 15px) 0;
+        }
+
+        #loss-reason {
+            color: var(--text-dim);
+        }
+
+        #safe-list {
+            text-align: left;
+            margin: 0 auto;
+            width: min(200px, 80vw);
+            color: var(--neon-green);
+            font-size: var(--font-sm);
+        }
+
+        /* Navigation button */
+        .nav-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: clamp(5px, 1.5vw, 8px) clamp(10px, 3vw, 15px) !important;
+            font-size: var(--font-xs) !important;
+            margin: 0 !important;
+            text-decoration: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            #scoreboard {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin-bottom: clamp(10px, 3vw, 15px);
+            }
+
+            .info-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #controls {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            input[type="number"] {
+                width: min(150px, 50vw);
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            body::before {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -192,14 +508,15 @@
 
     <!-- Left-side Scoreboard -->
     <div id="scoreboard" class="hidden">
-        <h3>SCOREBOARD</h3>
+        <h3>> Scoreboard</h3>
         <div id="scoreboard-list"></div>
     </div>
 
     <div id="setup-screen" class="container">
-        <h1>DISHWASHER V2</h1>
-        <p>Rules:</p>
-        <ul style="text-align: left; display: inline-block;">
+        <a href="index.html" class="nav-btn" style="position: absolute; top: 10px; right: 10px;">DWV1</a>
+        <h1>Dishwasher V2</h1>
+        <p style="color: var(--neon-green);">> Rules:</p>
+        <ul>
             <li>10 Rounds per match.</li>
             <li>If you go below $0.01, you lose immediately.</li>
         </ul>
@@ -210,14 +527,14 @@
         </div>
         <br>
         <button onclick="addInput()">+ Add Player</button>
-        <button onclick="startGame()">START GAME</button>
+        <button onclick="startGame()">Start Game</button>
     </div>
 
     <div id="game-screen" class="container hidden">
         <div class="info-bar">
             <span id="match-display">MATCH 1</span>
             <span id="round-display">ROUND 1/10</span>
-            <span id="player-display" style="color: yellow;">PLAYER: ???</span>
+            <span id="player-display">PLAYER: ???</span>
             <span id="money-display">$$$: 100.00</span>
         </div>
 
@@ -231,7 +548,7 @@
             <button id="action-btn" onclick="placeBet()">PLACE BET</button>
             <button id="party-btn" onclick="activateParty()">PARTY (-$100)</button>
         </div>
-        <div id="status-msg" style="min-height: 1.5em; color: #888;">Waiting for bet...</div>
+        <div id="status-msg">Waiting for bet...</div>
 
         <div id="overlay" class="hidden">
             <h1 id="overlay-title">MATCH OVER</h1>
@@ -241,13 +558,13 @@
     </div>
 
     <div id="result-screen" class="container hidden">
-        <h1 style="color: red;">GAME OVER</h1>
-        <p>THE DISHWASHER IS:</p>
-        <h2 id="loser-name" style="font-size: 3em; border: 2px solid red; padding: 20px;">???</h2>
-        <p id="loss-reason" style="color: #aaa;">(Ran out of money)</p>
+        <h1>GAME OVER</h1>
+        <p style="color: var(--neon-cyan);">THE DISHWASHER IS:</p>
+        <h2 id="loser-name">???</h2>
+        <p id="loss-reason">(Ran out of money)</p>
         <br>
-        <p>SAFE PLAYERS:</p>
-        <div id="safe-list" style="text-align: left; margin: 0 auto; width: 200px;"></div>
+        <p style="color: var(--neon-cyan);">SAFE PLAYERS:</p>
+        <div id="safe-list"></div>
         <br>
         <button onclick="location.reload()">PLAY AGAIN</button>
     </div>
@@ -334,7 +651,7 @@
             // Reset Visuals
             document.getElementById('multiplier-display').innerText = "1.00x";
             document.getElementById('multiplier-display').className = "big-text";
-            document.getElementById('multiplier-display').style.color = "white";
+            document.getElementById('multiplier-display').style.color = "#0ff";
             
             document.getElementById('reveal-display').style.visibility = "hidden";
             
@@ -354,20 +671,23 @@
         }
 
         function resetGraph() {
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "#0a0a0a";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = "#333";
+            ctx.strokeStyle = "#222";
             ctx.lineWidth = 1;
             ctx.beginPath();
             for(let x=0; x<canvas.width; x+=50) { ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); }
             for(let y=0; y<canvas.height; y+=50) { ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); }
             ctx.stroke();
-            ctx.strokeStyle = "white";
+            ctx.strokeStyle = "#0ff";
             ctx.lineWidth = 3;
+            ctx.shadowColor = "#0ff";
+            ctx.shadowBlur = 10;
             ctx.beginPath();
             ctx.moveTo(0, canvas.height);
             ctx.lineTo(canvas.width, canvas.height);
             ctx.stroke();
+            ctx.shadowBlur = 0;
         }
 
         // --- NEW FEATURE: PARTY MODE ---
@@ -409,7 +729,7 @@
                 ? "Party effect: doubled everyone else!"
                 : "Party effect: halved everyone else!";
 
-            // Remove effect after 3 seconds
+            // Remove effect after 2 seconds
             setTimeout(() => {
                 document.documentElement.classList.remove('party-active');
                 document.getElementById('status-msg').innerText = "Party over. Back to betting.";
@@ -418,7 +738,7 @@
                 if (p.money < 0.01) {
                     showFinalResults(p, "SPENT IT ALL ON PARTYING");
                 }
-            }, 3000);
+            }, 2000);
         }
 
         // --- GAMEPLAY ---
@@ -492,7 +812,7 @@
         }
 
         function drawGraph(time, mult) {
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "#0a0a0a";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.strokeStyle = "#222";
             ctx.lineWidth = 1;
@@ -501,8 +821,11 @@
             for(let y=0; y<canvas.height; y+=50) { ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); }
             ctx.stroke();
 
-            ctx.strokeStyle = "white";
+            // Neon cyan line with glow
+            ctx.strokeStyle = "#0f0";
             ctx.lineWidth = 4;
+            ctx.shadowColor = "#0f0";
+            ctx.shadowBlur = 15;
             ctx.beginPath();
             ctx.moveTo(0, canvas.height);
 
@@ -519,6 +842,7 @@
                 ctx.lineTo(x, y);
             }
             ctx.stroke();
+            ctx.shadowBlur = 0;
         }
 
         function cashOut() {
@@ -541,6 +865,12 @@
         function doCrash() {
             isRunning = false;
             cancelAnimationFrame(animationFrame);
+
+            // Flash red effect
+            document.documentElement.classList.add('crash-active');
+            setTimeout(() => {
+                document.documentElement.classList.remove('crash-active');
+            }, 1500);
 
             document.getElementById('multiplier-display').innerText = "CRASH @ " + crashPoint.toFixed(2) + "x";
             document.getElementById('multiplier-display').classList.add('blink');
