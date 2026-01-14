@@ -2,8 +2,7 @@
    TERMINAL NEON THEME - DISHWASH
    ============================================ */
 
-/* Import terminal-style font */
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+/* Fonts loaded via HTML <link> tags for better GitHub Pages compatibility */
 
 /* Reset and Base Styles */
 * {
